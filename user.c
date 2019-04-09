@@ -1,8 +1,8 @@
 #include "user.h"
 
-USER* get_user_info(char *token)
+void getUserInfo(char *token)
 {
-    USER *user = malloc(sizeof(*user));
+    user = malloc(sizeof(*user));
     sprintf(buffer, "%s?hx=%s&pm=login", base_url, token);
 
     string web_result;
@@ -10,20 +10,22 @@ USER* get_user_info(char *token)
 
     curl_easy_setopt(curl, CURLOPT_URL, buffer);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &web_result);
-	
-	CURLcode res = curl_easy_perform(curl);
+
+    CURLcode res = curl_easy_perform(curl);
     if(res != CURLE_OK) {
         printf("error(get_user_info): curl_easy_perform() failed! %s\n", curl_easy_strerror(res));
-        return NULL;
+        user = NULL;
+        return;
     }
 
     xmlDoc *doc = xmlParseMemory(web_result.ptr, web_result.len);
-	
-	freeStr(web_result);
-	
+
+    freeStr(web_result);
+
     if (doc == NULL) {
         printf("error(get_user_info): could not parse the resulting xml\n");
-        return NULL;
+        user = NULL;
+        return;
     }
 
     for (xmlNode *cur_node = xmlDocGetRootElement(doc); cur_node;
@@ -38,7 +40,8 @@ USER* get_user_info(char *token)
                 if (xmlStrEqual(content, (const xmlChar*)"-1"))
                 {
                     printf("error: login incorrect (password)\n");
-                    return NULL;
+                    user = NULL;
+                    return;
                 }
             }
             else if (xmlStrEqual(cur_node->name, (const xmlChar*)"jmeno"))
@@ -75,8 +78,12 @@ USER* get_user_info(char *token)
         }
 
     }
-    
+
     xmlFreeDoc(doc);
 
-    return user;
+}
+
+void printUser()
+{
+    printf("%s\n\t%s\n\t%s\n\t%s\n", user->name, user->skola, user->strtyp, user->trida);
 }

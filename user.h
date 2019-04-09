@@ -21,6 +21,9 @@ extern CURL *curl;
 extern const char base_url[];
 extern char buffer[512];
 
-USER* get_user_info(char *token);
+USER *user;
+
+void getUserInfo(char *token);
+void printUser();
 
 #endif
